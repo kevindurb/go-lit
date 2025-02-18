@@ -13,9 +13,19 @@ type createTodoBody struct {
 func (app *App) handleCreateTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var b createTodoBody
-	json.NewDecoder(r.Body).Decode(&b)
-	t := entities.Todo{}
-	app.DB.Create(&t)
+	err := json.NewDecoder(r.Body).Decode(&b)
+	if err != nil {
+		app.handleError(w, http.StatusBadRequest, "Bad request")
+		return
+	}
+
+	t := entities.Todo{Description: b.Description}
+	result := app.DB.Create(&t)
+	if result.Error != nil {
+		app.handleError(w, http.StatusInternalServerError, "Error creating todo")
+		return
+	}
+
 	response, _ := json.Marshal(t)
 	w.Write(response)
 }
