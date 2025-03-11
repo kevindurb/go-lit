@@ -29,3 +29,16 @@ func (app *App) handleCreateTodo(w http.ResponseWriter, r *http.Request) {
 	response, _ := json.Marshal(t)
 	w.Write(response)
 }
+
+func (app *App) handleListTodos(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var t []entities.Todo
+	result := app.DB.Find(&t)
+	if result.Error != nil {
+		app.handleError(w, http.StatusInternalServerError, "Error getting todos")
+	}
+
+	response, _ := json.Marshal(t)
+	w.Write(response)
+}
